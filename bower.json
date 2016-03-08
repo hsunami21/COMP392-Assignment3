@@ -1,0 +1,25 @@
+{
+  "name": "comp392-assignment3-mazerunner",
+  "authors": [
+    "Wendall Hsu <whsu21@hotmail.com>"
+  ],
+  "description": "COMP392 - Assignment 3 - Maze Runner",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "https://github.com/hsunami21/COMP392-Assignment3",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "Scripts/lib"
+  ],
+  "dependencies": {
+    "three.js": "threejs#*",
+    "dat-gui": "~0.5.1",
+    "stats.js": "*",
+    "Physijs": "physijs#*"
+  }
+}
