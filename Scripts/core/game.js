@@ -52,6 +52,13 @@ var game = (function () {
     var playerGeometry;
     var playerMaterial;
     var player;
+    var sphereGeometry;
+    var sphereMaterial;
+    var sphere;
+    var keyboardControls;
+    var isGrounded = false;
+    var velocity = new Vector3(0, 0, 0);
+    var prevTime = 0;
     function init() {
         // Create to HTMLElements
         blocker = document.getElementById("blocker");
@@ -60,6 +67,8 @@ var game = (function () {
         havePointerLock = 'pointerLockElement' in document ||
             'mozPointerLockElement' in document ||
             'webkitPointerLockElement' in document;
+        // setup keyboard controls
+        keyboardControls = new objects.KeyboardControls();
         if (havePointerLock) {
             element = document.body;
             instructions.addEventListener('click', function () {
@@ -80,7 +89,7 @@ var game = (function () {
         // Scene changes for Physijs
         scene.name = "Main";
         scene.fog = new THREE.Fog(0xffffff, 0, 750);
-        //scene.setGravity(0);
+        scene.setGravity(new THREE.Vector3(0, -10, 0));
         scene.addEventListener('update', function () {
             scene.simulate(undefined, 2);
         });
@@ -124,6 +133,25 @@ var game = (function () {
         player.name = "Player";
         scene.add(player);
         console.log("Added Player to Scene");
+        player.addEventListener('collision', function (e) {
+            if (e.name === "Platform1") {
+                console.log("Player hit the ground");
+                isGrounded = true;
+            }
+            if (e.name === "Sphere") {
+                console.log("Player hit the sphere");
+            }
+        });
+        // Sphere Object
+        sphereGeometry = new SphereGeometry(2, 32, 32);
+        sphereMaterial = Physijs.createMaterial(new LambertMaterial({ color: 0x00ff00 }), 0.4, 0);
+        sphere = new Physijs.SphereMesh(sphereGeometry, sphereMaterial, 1);
+        sphere.position.set(0, 60, 10);
+        sphere.receiveShadow = true;
+        sphere.castShadow = true;
+        sphere.name = "Sphere";
+        scene.add(sphere);
+        console.log("Added Sphere to Scene");
         // add controls
         gui = new GUI();
         control = new Control();
@@ -140,10 +168,12 @@ var game = (function () {
     function pointerLockChange(event) {
         if (document.pointerLockElement === element) {
             // enable our mouse and keyboard controls
+            keyboardControls.enabled = true;
             blocker.style.display = 'none';
         }
         else {
             // disable our mouse and keyboard controls
+            keyboardControls.enabled = false;
             blocker.style.display = '-webkit-box';
             blocker.style.display = '-moz-box';
             blocker.style.display = 'box';
@@ -177,6 +207,38 @@ var game = (function () {
     // Setup main game loop
     function gameLoop() {
         stats.update();
+        if (keyboardControls.enabled) {
+            velocity = new Vector3();
+            var time = performance.now();
+            var delta = (time - prevTime) / 1000;
+            if (isGrounded) {
+                if (keyboardControls.moveForward) {
+                    console.log("Moving Forward");
+                    velocity.z -= 400.0 * delta;
+                }
+                if (keyboardControls.moveLeft) {
+                    console.log("Moving left");
+                    velocity.x -= 400.0 * delta;
+                }
+                if (keyboardControls.moveBackward) {
+                    console.log("Moving Backward");
+                    velocity.z += 400.0 * delta;
+                }
+                if (keyboardControls.moveRight) {
+                    console.log("Moving Right");
+                    velocity.x += 400.0 * delta;
+                }
+                if (keyboardControls.jump) {
+                    console.log("Jumping");
+                    velocity.y += 2000.0 * delta;
+                    if (player.position.y > 4) {
+                        isGrounded = false;
+                    }
+                }
+            }
+        }
+        player.applyCentralForce(velocity);
+        prevTime = time;
         // render using requestAnimationFrame
         requestAnimationFrame(gameLoop);
         // render the scene
@@ -203,5 +265,4 @@ var game = (function () {
         scene: scene
     };
 })();
-
 //# sourceMappingURL=game.js.map

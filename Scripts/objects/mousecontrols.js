@@ -7,8 +7,7 @@ var objects;
         function MouseControls() {
         }
         return MouseControls;
-    }());
+    })();
     objects.MouseControls = MouseControls;
 })(objects || (objects = {}));
-
 //# sourceMappingURL=mousecontrols.js.map

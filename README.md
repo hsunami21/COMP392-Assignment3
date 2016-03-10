@@ -1,3 +1,3 @@
-#COMP392-Lesson8
+#Maze Runner
 
-COMP392-Lesson8 for COMP392 - Advanced Graphics @ Centennial College
+COMP392 - Assignment 3 - Advanced Graphics @ Centennial College
