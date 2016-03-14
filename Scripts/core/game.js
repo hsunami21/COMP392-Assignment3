@@ -12,8 +12,10 @@ var Geometry = THREE.Geometry;
 var AxisHelper = THREE.AxisHelper;
 var LambertMaterial = THREE.MeshLambertMaterial;
 var MeshBasicMaterial = THREE.MeshBasicMaterial;
+var LineBasicMaterial = THREE.LineBasicMaterial;
 var Material = THREE.Material;
 var Mesh = THREE.Mesh;
+var Line = THREE.Line;
 var Object3D = THREE.Object3D;
 var SpotLight = THREE.SpotLight;
 var PointLight = THREE.PointLight;
@@ -47,7 +49,7 @@ var game = (function () {
     var spotLight;
     var groundGeometry;
     var groundMaterial;
-    var ground1;
+    var ground;
     var clock;
     var playerGeometry;
     var playerMaterial;
@@ -56,9 +58,13 @@ var game = (function () {
     var sphereMaterial;
     var sphere;
     var keyboardControls;
+    var mouseControls;
     var isGrounded = false;
     var velocity = new Vector3(0, 0, 0);
     var prevTime = 0;
+    var directionLineMaterial;
+    var directionLineGeometry;
+    var directionLine;
     function init() {
         // Create to HTMLElements
         blocker = document.getElementById("blocker");
@@ -67,8 +73,9 @@ var game = (function () {
         havePointerLock = 'pointerLockElement' in document ||
             'mozPointerLockElement' in document ||
             'webkitPointerLockElement' in document;
-        // setup keyboard controls
+        // setup keyboard and mouse controls
         keyboardControls = new objects.KeyboardControls();
+        mouseControls = new objects.MouseControls();
         if (havePointerLock) {
             element = document.body;
             instructions.addEventListener('click', function () {
@@ -117,15 +124,15 @@ var game = (function () {
         console.log("Added spotLight to scene");
         // Platform 1
         groundGeometry = new BoxGeometry(32, 1, 32);
-        groundMaterial = Physijs.createMaterial(new LambertMaterial({ color: 0xe75d14 }), 0.4, 0);
-        ground1 = new Physijs.ConvexMesh(groundGeometry, groundMaterial, 0);
-        ground1.receiveShadow = true;
-        ground1.name = "Platform1";
-        scene.add(ground1);
-        console.log("Added Platform 1 to scene");
+        groundMaterial = Physijs.createMaterial(new LambertMaterial({ color: 0xe75d14 }), 0, 0);
+        ground = new Physijs.ConvexMesh(groundGeometry, groundMaterial, 0);
+        ground.receiveShadow = true;
+        ground.name = "Ground";
+        scene.add(ground);
+        console.log("Added Ground to scene");
         // Player Object
         playerGeometry = new BoxGeometry(2, 2, 2);
-        playerMaterial = Physijs.createMaterial(new LambertMaterial({ color: 0x00ff00 }), 0.4, 0);
+        playerMaterial = Physijs.createMaterial(new LambertMaterial({ color: 0x00ff00 }), 0, 0);
         player = new Physijs.BoxMesh(playerGeometry, playerMaterial, 1);
         player.position.set(0, 30, 10);
         player.receiveShadow = true;
@@ -134,7 +141,7 @@ var game = (function () {
         scene.add(player);
         console.log("Added Player to Scene");
         player.addEventListener('collision', function (e) {
-            if (e.name === "Platform1") {
+            if (e.name === "Ground") {
                 console.log("Player hit the ground");
                 isGrounded = true;
             }
@@ -142,11 +149,19 @@ var game = (function () {
                 console.log("Player hit the sphere");
             }
         });
+        // Add Direction Line
+        directionLineMaterial = new LineBasicMaterial({ color: 0xffff00 });
+        directionLineGeometry = new Geometry();
+        directionLineGeometry.vertices.push(new Vector3(0, 0, 0)); // line origin
+        directionLineGeometry.vertices.push(new Vector3(0, 0, -50)); // end of line
+        directionLine = new Line(directionLineGeometry, directionLineMaterial);
+        player.add(directionLine);
+        console.log("Added Direction Line to player");
         // Sphere Object
         sphereGeometry = new SphereGeometry(2, 32, 32);
-        sphereMaterial = Physijs.createMaterial(new LambertMaterial({ color: 0x00ff00 }), 0.4, 0);
+        sphereMaterial = Physijs.createMaterial(new LambertMaterial({ color: 0x00ff00 }), 0, 0);
         sphere = new Physijs.SphereMesh(sphereGeometry, sphereMaterial, 1);
-        sphere.position.set(0, 60, 10);
+        sphere.position.set(0, 60, 0);
         sphere.receiveShadow = true;
         sphere.castShadow = true;
         sphere.name = "Sphere";
@@ -169,11 +184,13 @@ var game = (function () {
         if (document.pointerLockElement === element) {
             // enable our mouse and keyboard controls
             keyboardControls.enabled = true;
+            mouseControls.enabled = true;
             blocker.style.display = 'none';
         }
         else {
             // disable our mouse and keyboard controls
             keyboardControls.enabled = false;
+            mouseControls.enabled = false;
             blocker.style.display = '-webkit-box';
             blocker.style.display = '-moz-box';
             blocker.style.display = 'box';
@@ -236,8 +253,12 @@ var game = (function () {
                     }
                 }
             }
+            player.setAngularVelocity(new Vector3(mouseControls.pitch, mouseControls.yaw, 0));
+            player.applyCentralForce(velocity);
         }
-        player.applyCentralForce(velocity);
+        else {
+            player.setAngularVelocity(new Vector3(0, 0, 0));
+        }
         prevTime = time;
         // render using requestAnimationFrame
         requestAnimationFrame(gameLoop);
