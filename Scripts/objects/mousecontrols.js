@@ -13,7 +13,7 @@ var objects;
         // PUBLIC METHODS
         MouseControls.prototype.onMouseMove = function (event) {
             this.yaw = -event.movementX * this.sensitivity;
-            this.pitch = -event.movementY * this.sensitivity;
+            this.pitch = -event.movementY * this.sensitivity * 0.01;
         };
         return MouseControls;
     })();
