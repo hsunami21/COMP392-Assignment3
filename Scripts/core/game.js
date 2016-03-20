@@ -62,9 +62,9 @@ var game = (function () {
     var playerGeometry;
     var playerMaterial;
     var player;
-    var sphereGeometry;
-    var sphereMaterial;
-    var sphere;
+    var boulderGeometry;
+    var boulderMaterial;
+    var boulder;
     var keyboardControls;
     var mouseControls;
     var isGrounded = false;
@@ -75,7 +75,11 @@ var game = (function () {
     var directionLine;
     var wallMaterial;
     var walls;
-    var axes;
+    var fireGeometry;
+    var fireMaterial;
+    var fireTraps;
+    var spikeMaterial;
+    var spikeTraps;
     function init() {
         // Create to HTMLElements
         blocker = document.getElementById("blocker");
@@ -115,11 +119,6 @@ var game = (function () {
         clock = new Clock();
         setupRenderer(); // setup the default renderer
         setupCamera(); // setup the camera
-        // Add an axis helper to the scene
-        // axes = new AxisHelper(30);
-        // axes.position.set(0, 5, 0);
-        // scene.add(axes);
-        // console.log("Added Axis Helper to scene...");
         // Spot Light
         // spotLights = new Array<SpotLight>();
         // spotLights.push(new SpotLight(0xffffff, 1, 75));
@@ -176,7 +175,7 @@ var game = (function () {
         ceiling.position.set(0, 24, 0);
         ceiling.receiveShadow = true;
         ceiling.name = "Ceiling";
-        scene.add(ceiling);
+        // scene.add(ceiling);
         console.log("Added Ceiling to scene");
         // Walls
         walls = new Array();
@@ -191,7 +190,7 @@ var game = (function () {
         walls[2].position.set(0, 12, 32);
         walls[3].position.set(0, 12, -32);
         // Inner walls
-        walls.push(new Physijs.BoxMesh(new BoxGeometry(50, 24, 2), wallMaterial, 0));
+        walls.push(new Physijs.BoxMesh(new BoxGeometry(54, 24, 2), wallMaterial, 0));
         walls.push(new Physijs.BoxMesh(new BoxGeometry(2, 24, 40), wallMaterial, 0));
         walls.push(new Physijs.BoxMesh(new BoxGeometry(32, 24, 2), wallMaterial, 0));
         walls.push(new Physijs.BoxMesh(new BoxGeometry(44, 24, 2), wallMaterial, 0));
@@ -202,7 +201,7 @@ var game = (function () {
         walls.push(new Physijs.BoxMesh(new BoxGeometry(10, 24, 2), wallMaterial, 0));
         walls.push(new Physijs.BoxMesh(new BoxGeometry(2, 24, 10), wallMaterial, 0));
         walls.push(new Physijs.BoxMesh(new BoxGeometry(2, 24, 10), wallMaterial, 0));
-        walls[4].position.set(6, 12, -20);
+        walls[4].position.set(4, 12, -20);
         walls[5].position.set(20, 12, 0);
         walls[6].position.set(4, 12, 19);
         walls[7].position.set(-11, 12, 0);
@@ -215,15 +214,40 @@ var game = (function () {
         walls[14].position.set(-22, 12, -6);
         for (var i = 0; i < walls.length; i++) {
             walls[i].receiveShadow = true;
-            walls[i].name = "Wall " + i;
+            walls[i].name = "Wall";
             scene.add(walls[i]);
-            console.log("Added Wall " + i + " to scene");
+            console.log("Added Walls to scene");
+        }
+        // Fire traps
+        fireTraps = new Array();
+        fireMaterial = Physijs.createMaterial(new LambertMaterial({ map: THREE.ImageUtils.loadTexture('../../Assets/Images/fire.jpg'), side: THREE.DoubleSide }), 0, 0);
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 8), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 8), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(10, 2, 2), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(8, 2, 2), fireMaterial, 0));
+        fireTraps[0].position.set(0, 1, 15);
+        fireTraps[1].position.set(0, 1, -15);
+        fireTraps[2].position.set(-6, 1, 25);
+        fireTraps[3].position.set(10, 1, 25);
+        fireTraps[4].position.set(4, 1, -25);
+        fireTraps[5].position.set(-16, 1, 14);
+        fireTraps[6].position.set(-27, 1, 14);
+        for (var i = 0; i < fireTraps.length; i++) {
+            fireTraps[i].receiveShadow = true;
+            fireTraps[i].name = "Fire";
+            scene.add(fireTraps[i]);
+            console.log("Added Fire to scene");
         }
         // Player Object
         playerGeometry = new BoxGeometry(2, 2, 2);
         playerMaterial = Physijs.createMaterial(new LambertMaterial({ color: 0x00ff00 }), 0, 0);
         player = new Physijs.BoxMesh(playerGeometry, playerMaterial, 1);
-        player.position.set(26, 2, -16);
+        // player.position.set(26, 2, -16);
+        // FOR TESTING PURPOSES
+        player.position.set(-12, 2, -5);
         player.rotation.y = Math.PI;
         player.receiveShadow = true;
         player.castShadow = true;
@@ -235,8 +259,11 @@ var game = (function () {
                 console.log("Player hit the ground");
                 isGrounded = true;
             }
-            if (e.name === "Sphere") {
-                console.log("Player hit the sphere");
+            if (e.name === "Boulder") {
+                console.log("Player hit the boulder");
+            }
+            if (e.name === "Fire") {
+                console.log("Player hit the fire");
             }
         });
         // Add Direction Line
@@ -251,19 +278,19 @@ var game = (function () {
         player.add(camera);
         camera.position.set(0, 1, 0);
         // Sphere Object
-        sphereGeometry = new SphereGeometry(2, 32, 32);
-        sphereMaterial = Physijs.createMaterial(new LambertMaterial({ color: 0x00ff00 }), 0, 0);
-        sphere = new Physijs.SphereMesh(sphereGeometry, sphereMaterial, 1);
-        sphere.position.set(-5, 5, -5);
-        sphere.receiveShadow = true;
-        sphere.castShadow = true;
-        sphere.name = "Sphere";
-        scene.add(sphere);
-        console.log("Added Sphere to Scene");
+        boulderGeometry = new SphereGeometry(2, 32, 32);
+        boulderMaterial = Physijs.createMaterial(new LambertMaterial({ map: THREE.ImageUtils.loadTexture('../../Assets/Images/boulder.jpg') }), 0, 0);
+        boulder = new Physijs.SphereMesh(boulderGeometry, boulderMaterial, 1);
+        boulder.position.set(-26, 2, -5);
+        boulder.receiveShadow = true;
+        boulder.castShadow = true;
+        boulder.name = "Boulder";
+        scene.add(boulder);
+        console.log("Added Boulder to Scene");
         // add controls
-        gui = new GUI();
-        control = new Control();
-        addControl(control);
+        // gui = new GUI();
+        // control = new Control();
+        // addControl(control);
         // Add framerate stats
         addStatsObject();
         console.log("Added Stats to scene...");
@@ -318,6 +345,12 @@ var game = (function () {
     function gameLoop() {
         stats.update();
         checkControls();
+        if (boulder.position.z > -24) {
+            if (player.position.x < -22 && player.position.x < -10) {
+                boulder.applyCentralForce(new Vector3(0, 0, -2));
+                boulder.setAngularVelocity(new Vector3(-0.5, 0, 0));
+            }
+        }
         // render using requestAnimationFrame
         requestAnimationFrame(gameLoop);
         // render the scene
