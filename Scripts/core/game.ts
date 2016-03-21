@@ -363,10 +363,7 @@ var game = (() => {
         // Pair camera with player
         player.add(camera);
         // camera.position.set(0, 1, 0);
-        
-       
-        
-        
+
         // add controls
         // gui = new GUI();
         // control = new Control();
@@ -534,3 +531,4 @@ var game = (() => {
 
 })();
 
+// Add ceiling, change start position, change camera perspective
