@@ -82,12 +82,13 @@ var game = (() => {
     var directionLine: Line;
     var wallMaterial: Physijs.Material;
     var walls: Physijs.Mesh[];
-    var fireGeometry: BoxGeometry;
     var fireMaterial: Physijs.Material;
     var fireTraps: Physijs.Mesh[];
     var spikeMaterial: Physijs.Material;
     var spikeTraps: Physijs.Mesh[];
-
+    var ladderGeometry: CubeGeometry;
+    var ladderMaterial: Physijs.Material;
+    var ladder: Physijs.Mesh;
     
     function init() {
         // Create to HTMLElements
@@ -177,10 +178,15 @@ var game = (() => {
         pointLights.push(new PointLight(0xffffff, 1, 55));
         pointLights.push(new PointLight(0xffffff, 1, 55));
         pointLights.push(new PointLight(0xffffff, 1, 55));
+        pointLights.push(new PointLight(0xffffff, 2, 10));
+        pointLights.push(new PointLight(0xffffff, 2, 10));
+
         pointLights[0].position.set(28, 20, 28);
         pointLights[1].position.set(-28, 20, 28);
         pointLights[2].position.set(28, 20, -28);
         pointLights[3].position.set(-28, 20, -28);
+        pointLights[4].position.set(22, 5, -26);
+        pointLights[5].position.set(30, 5, -26);
         
         for (var i = 0; i < pointLights.length; i++) {
             pointLights[i].name = "Point Light " + i;
@@ -206,6 +212,16 @@ var game = (() => {
         ceiling.name = "Ceiling";
         // scene.add(ceiling);
         console.log("Added Ceiling to scene");
+        
+        // Ladder
+        ladderGeometry = new BoxGeometry(1, 10, 4);
+        ladderMaterial = Physijs.createMaterial(new LambertMaterial({ map: THREE.ImageUtils.loadTexture('../../Assets/Images/ladder.jpg'), side: THREE.DoubleSide }), 0, 0);
+        ladder = new Physijs.ConvexMesh(ladderGeometry, ladderMaterial, 0);
+        ladder.position.set(26, 5, -26);
+        ladder.receiveShadow = true;
+        ladder.name = "Ladder";
+        scene.add(ladder);
+        console.log("Added Ladder to scene");
         
         // Walls
         walls = new Array<Physijs.BoxMesh>();
@@ -264,16 +280,28 @@ var game = (() => {
         fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
         fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
         fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
         fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(10, 2, 2), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(8, 2, 2), fireMaterial, 0));
         fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(8, 2, 2), fireMaterial, 0));
         
         fireTraps[0].position.set(0, 1, 15);
         fireTraps[1].position.set(0, 1, -15);
-        fireTraps[2].position.set(-6, 1, 25);
-        fireTraps[3].position.set(10, 1, 25);
-        fireTraps[4].position.set(4, 1, -25);
-        fireTraps[5].position.set(-16, 1, 14);
-        fireTraps[6].position.set(-27, 1, 14);
+        fireTraps[2].position.set(-8, 1, 25);
+        fireTraps[3].position.set(5, 1, 25);
+        fireTraps[4].position.set(18, 1, 25);
+        fireTraps[5].position.set(-16, 1, -25);
+        fireTraps[6].position.set(-8, 1, -25);
+        fireTraps[7].position.set(0, 1, -25);
+        fireTraps[8].position.set(8, 1, -25);
+        fireTraps[9].position.set(16, 1, -25);
+        fireTraps[10].position.set(-16, 1, 14);
+        fireTraps[11].position.set(-27, 1, 18);
+        fireTraps[12].position.set(15, 1, 0);
         
         for (var i = 0; i < fireTraps.length; i++) {
             fireTraps[i].receiveShadow = true;
@@ -281,7 +309,17 @@ var game = (() => {
             scene.add(fireTraps[i]);
             console.log("Added Fire to scene");
         }
-
+        
+         // Boulder
+        boulderGeometry = new SphereGeometry(3, 32, 32);
+        boulderMaterial = Physijs.createMaterial(new LambertMaterial({map: THREE.ImageUtils.loadTexture('../../Assets/Images/boulder.jpg')}), 0, 0);
+        boulder = new Physijs.SphereMesh(boulderGeometry, boulderMaterial, 1);
+        boulder.position.set(-27, 2, -5);
+        boulder.receiveShadow = true;
+        boulder.castShadow = true;
+        boulder.name = "Boulder";
+        scene.add(boulder);
+        console.log("Added Boulder to Scene");
  
         // Player Object
         playerGeometry = new BoxGeometry(2, 2, 2);
@@ -309,6 +347,7 @@ var game = (() => {
            }
            if (e.name === "Fire") {
                console.log("Player hit the fire");
+               isGrounded = true;
            }
         });
         
@@ -323,18 +362,9 @@ var game = (() => {
         
         // Pair camera with player
         player.add(camera);
-        camera.position.set(0, 1, 0);
+        // camera.position.set(0, 1, 0);
         
-        // Sphere Object
-        boulderGeometry = new SphereGeometry(2, 32, 32);
-        boulderMaterial = Physijs.createMaterial(new LambertMaterial({map: THREE.ImageUtils.loadTexture('../../Assets/Images/boulder.jpg')}), 0, 0);
-        boulder = new Physijs.SphereMesh(boulderGeometry, boulderMaterial, 1);
-        boulder.position.set(-26, 2, -5);
-        boulder.receiveShadow = true;
-        boulder.castShadow = true;
-        boulder.name = "Boulder";
-        scene.add(boulder);
-        console.log("Added Boulder to Scene");
+       
         
         
         // add controls
@@ -406,12 +436,12 @@ var game = (() => {
         checkControls();
         
         if (boulder.position.z > -24) {
-            if (player.position.x < -22 && player.position.x < -10) {
-                boulder.applyCentralForce(new Vector3(0, 0, -2));
-                boulder.setAngularVelocity(new Vector3(-0.5, 0, 0));
+            if (player.position.x < -20 && player.position.z < -10) {
+                boulder.applyCentralForce(new Vector3(0, 0, -4));
+                boulder.setAngularVelocity(new Vector3(-1, 0, 0));
             }
         }
-        
+                
         // render using requestAnimationFrame
         requestAnimationFrame(gameLoop);
 	
@@ -490,9 +520,9 @@ var game = (() => {
     // Setup main camera for the scene
     function setupCamera(): void {
         camera = new PerspectiveCamera(35, config.Screen.RATIO, 0.1, 1000);
-        // camera.position.set(0, 150, 0);
-        // camera.lookAt(new Vector3(0, 0, 0));
-        // camera.rotation.z = 2 * Math.PI;
+        camera.position.set(0, 150, 0);
+        camera.lookAt(new Vector3(0, 0, 0));
+        camera.rotation.z = 2 * Math.PI;
         console.log("Finished setting up Camera...");
     }
 
