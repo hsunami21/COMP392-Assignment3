@@ -13,8 +13,7 @@
     "node_modules",
     "bower_components",
     "test",
-    "tests",
-    "Scripts/lib"
+    "tests"
   ],
   "dependencies": {
     "three.js": "threejs#*",
