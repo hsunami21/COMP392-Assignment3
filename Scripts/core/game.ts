@@ -81,9 +81,9 @@ var game = (() => {
     var ladderGeometry: CubeGeometry;
     var ladderMaterial: Physijs.Material;
     var ladder: Physijs.Mesh;
-    var coinGeometry: Geometry;
     var coinMaterial: Physijs.Material;
-    var coin: Physijs.ConvexMesh;
+    var coins: Physijs.ConcaveMesh[];
+    var coinCount: number = 10;
     
     // CreateJS variables
     var assets: createjs.LoadQueue;
@@ -235,7 +235,7 @@ var game = (() => {
         ceiling.position.set(0, 24, 0);
         ceiling.receiveShadow = true;
         ceiling.name = "Ceiling";
-        // scene.add(ceiling);
+        scene.add(ceiling);
         console.log("Added Ceiling to scene");
         
         // Ladder
@@ -346,6 +346,9 @@ var game = (() => {
         scene.add(boulder);
         console.log("Added Boulder to Scene");
  
+        // Coins
+        addCoinMesh();
+ 
         // Player Object
         playerGeometry = new BoxGeometry(2, 2, 2);
         playerMaterial = Physijs.createMaterial(new LambertMaterial({color: 0x00ff00}), 0, 0);
@@ -379,10 +382,16 @@ var game = (() => {
                    lives += -1;
                }
                createjs.Sound.play("ouch");
+               livesLabel.text = "Lives: " + lives;
+
            }
            if (e.name === "Coin") {
                score += 100;
                createjs.Sound.play("coin");
+               scene.remove(e);
+               setCoinPosition(e);
+               scoreLabel.text = "Score: " + score;
+
            }
         });
         
@@ -397,7 +406,7 @@ var game = (() => {
         
         // Pair camera with player
         player.add(camera);
-        // camera.position.set(0, 1, 0);
+        camera.position.set(0, 1, 0);
 
         // Add framerate stats
         addStatsObject();
@@ -463,22 +472,30 @@ var game = (() => {
     
     // Add Coin to scene
     function addCoinMesh(): void {
+        coins = new Array<Physijs.ConvexMesh>(); // Instantiate a convex mesh array
         
-        var coinLoader = new THREE.JSONLoader().load("../../Assets/imported/coin.json", function(geometry: Geometry) {
-            coinMaterial = Physijs.createMaterial(new PhongMaterial({color: 0xffff00}), 0.4, 0.6);
-            coin = new Physijs.ConvexMesh(geometry, coinMaterial, 1);
-        });
+        var coinLoader = new THREE.JSONLoader().load("../../Assets/imported/coin.json", function(geometry: THREE.Geometry) {
+              var phongMaterial = new PhongMaterial({ color: 0xE7AB32 });
+              phongMaterial.emissive = new THREE.Color(0xE7AB32);        
+              
+              var coinMaterial = Physijs.createMaterial((phongMaterial), 0.4, 0.6);
+              for(var count = 0; count < coinCount; count++) {
+                 coins[count] = new Physijs.ConvexMesh(geometry, coinMaterial);     
+                 coins[count].receiveShadow = true;
+                 coins[count].castShadow = true;
+                 coins[count].name = "Coin";
+                 setCoinPosition(coins[count]);
+              }
+          });
+  
+          console.log("Added Coin Mesh to Scene");
         
-        coin.receiveShadow = true;
-        coin.castShadow = true;
-        coin.name = "Coin";
-        setCoinPosition();
     }
 
     // Set Coin position
-    function setCoinPosition(): void {
-        var randomPointX: number = Math.floor(Math.random() * 20) - 10;
-        var randomPointZ: number = Math.floor(Math.random() * 20) - 10;
+    function setCoinPosition(coin:Physijs.ConvexMesh): void {
+        var randomPointX: number = Math.floor(Math.random() * 32) - Math.floor(Math.random() * 32);
+        var randomPointZ: number = Math.floor(Math.random() * 32) - Math.floor(Math.random() * 32);
         coin.position.set(randomPointX, 2, randomPointZ);
         scene.add(coin);
     }
@@ -486,13 +503,7 @@ var game = (() => {
     // Setup main game loop
     function gameLoop(): void {
         stats.update();
-        
-        checkControls();
-        stage.update();
-        
-        scoreLabel.text = "Score: " + score;
-        livesLabel.text = "Lives: " + lives;
-        
+               
         if (boulder.position.z > -28) {
             if (player.position.x < -20 && player.position.z < -10) {
                 boulder.applyCentralForce(new Vector3(0, 0, -4));
@@ -500,9 +511,19 @@ var game = (() => {
             }
         }
         else {
-            boulder.applyCentralForce(new Vector3(0, 0, 0));
+            boulder.setLinearVelocity(new Vector3(0, 0, 0));
             boulder.setAngularVelocity(new Vector3(0, 0, 0));
         }
+        
+        for (var i = 0; i < coins.length; i++) {
+            coins[i].setAngularVelocity(new Vector3(0, 1, 0));
+            coins[i].setLinearVelocity(new Vector3(0, 0, 0));
+        }
+        
+        checkControls();
+        stage.update();
+        
+        
                 
         // render using requestAnimationFrame
         requestAnimationFrame(gameLoop);
@@ -582,9 +603,9 @@ var game = (() => {
     // Setup main camera for the scene
     function setupCamera(): void {
         camera = new PerspectiveCamera(35, config.Screen.RATIO, 0.1, 1000);
-        camera.position.set(0, 150, 0);
-        camera.lookAt(new Vector3(0, 0, 0));
-        camera.rotation.z = 2 * Math.PI;
+        // camera.position.set(0, 150, 0);
+        // camera.lookAt(new Vector3(0, 0, 0));
+        // camera.rotation.z = 2 * Math.PI;
         console.log("Finished setting up Camera...");
     }
 
