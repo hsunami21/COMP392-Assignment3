@@ -58,6 +58,7 @@ var game = (function () {
     var boulderGeometry;
     var boulderMaterial;
     var boulder;
+    var boulder2;
     var keyboardControls;
     var mouseControls;
     var isGrounded = false;
@@ -78,6 +79,9 @@ var game = (function () {
     var coinMaterial;
     var coins;
     var coinCount = 10;
+    var gameOver = false;
+    var blocker2;
+    var over;
     // CreateJS variables
     var assets;
     var canvas;
@@ -123,6 +127,8 @@ var game = (function () {
         // Create to HTMLElements
         blocker = document.getElementById("blocker");
         instructions = document.getElementById("instructions");
+        blocker2 = document.getElementById("blocker2");
+        over = document.getElementById("over");
         // Setup CreateJS Canvas and Stage and Scoreboard
         setupCanvas();
         setupScoreBoard();
@@ -264,7 +270,6 @@ var game = (function () {
         fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
         fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(10, 2, 2), fireMaterial, 0));
         fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(8, 2, 2), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(8, 2, 2), fireMaterial, 0));
         fireTraps[0].position.set(0, 1, 15);
         fireTraps[1].position.set(0, 1, -15);
         fireTraps[2].position.set(-8, 1, 25);
@@ -276,8 +281,7 @@ var game = (function () {
         fireTraps[8].position.set(8, 1, -25);
         fireTraps[9].position.set(16, 1, -25);
         fireTraps[10].position.set(-16, 1, 14);
-        fireTraps[11].position.set(-27, 1, 18);
-        fireTraps[12].position.set(15, 1, 0);
+        fireTraps[11].position.set(15, 1, 0);
         for (var i = 0; i < fireTraps.length; i++) {
             fireTraps[i].receiveShadow = true;
             fireTraps[i].name = "Fire";
@@ -294,6 +298,13 @@ var game = (function () {
         boulder.name = "Boulder";
         scene.add(boulder);
         console.log("Added Boulder to Scene");
+        boulder2 = new Physijs.SphereMesh(boulderGeometry, boulderMaterial, 1);
+        boulder2.position.set(-27, 2, 26);
+        boulder2.receiveShadow = true;
+        boulder2.castShadow = true;
+        boulder2.name = "Boulder";
+        scene.add(boulder2);
+        console.log("Added Boulder to Scene");
         // Coins
         addCoinMesh();
         // Player Object
@@ -302,7 +313,7 @@ var game = (function () {
         player = new Physijs.BoxMesh(playerGeometry, playerMaterial, 1);
         player.position.set(26, 2, -16);
         // FOR TESTING PURPOSES
-        // player.position.set(-12, 2, -5);
+        // player.position.set(-12, 2, 5);
         player.rotation.y = Math.PI;
         player.receiveShadow = true;
         player.castShadow = true;
@@ -319,6 +330,7 @@ var game = (function () {
                     lives += -lives;
                 }
                 createjs.Sound.play("scream");
+                livesLabel.text = "Lives: " + lives;
             }
             if (e.name === "Fire") {
                 isGrounded = true;
@@ -342,7 +354,7 @@ var game = (function () {
         directionLineGeometry.vertices.push(new Vector3(0, 0, 0)); // line origin
         directionLineGeometry.vertices.push(new Vector3(0, 0, -50)); // end of line
         directionLine = new Line(directionLineGeometry, directionLineMaterial);
-        player.add(directionLine);
+        // player.add(directionLine);
         console.log("Added Direction Line to player");
         // Pair camera with player
         player.add(camera);
@@ -372,6 +384,19 @@ var game = (function () {
             blocker.style.display = 'box';
             instructions.style.display = '';
             console.log("PointerLock disabled");
+        }
+    }
+    // Check game over
+    function checkGameOver() {
+        if (gameOver) {
+            // disable our mouse and keyboard controls
+            keyboardControls.enabled = false;
+            mouseControls.enabled = false;
+            blocker2.style.display = '-webkit-box';
+            blocker2.style.display = '-moz-box';
+            blocker2.style.display = 'box';
+            blocker.style.display = 'none';
+            instructions.style.display = 'none';
         }
     }
     //PointerLockError Event Handler
@@ -427,6 +452,9 @@ var game = (function () {
     // Setup main game loop
     function gameLoop() {
         stats.update();
+        if (lives == 0) {
+            gameOver = true;
+        }
         if (boulder.position.z > -28) {
             if (player.position.x < -20 && player.position.z < -10) {
                 boulder.applyCentralForce(new Vector3(0, 0, -4));
@@ -437,10 +465,21 @@ var game = (function () {
             boulder.setLinearVelocity(new Vector3(0, 0, 0));
             boulder.setAngularVelocity(new Vector3(0, 0, 0));
         }
+        if (boulder2.position.z > 4) {
+            if (player.position.x < -20 && player.position.z < 14) {
+                boulder2.applyCentralForce(new Vector3(0, 0, -8));
+                boulder2.setAngularVelocity(new Vector3(-2, 0, 0));
+            }
+        }
+        else {
+            boulder.setLinearVelocity(new Vector3(0, 0, 0));
+            boulder.setAngularVelocity(new Vector3(0, 0, 0));
+        }
         for (var i = 0; i < coins.length; i++) {
             coins[i].setAngularVelocity(new Vector3(0, 1, 0));
             coins[i].setLinearVelocity(new Vector3(0, 0, 0));
         }
+        checkGameOver();
         checkControls();
         stage.update();
         // render using requestAnimationFrame
