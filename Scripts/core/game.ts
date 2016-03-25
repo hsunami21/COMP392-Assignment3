@@ -414,12 +414,15 @@ var game = (() => {
                // disable our mouse and keyboard controls
                 keyboardControls.enabled = false;
                 mouseControls.enabled = false;
+                blocker.style.display = 'none';
+                instructions.style.display = 'none';
+                
                 blocker3.style.display = '-webkit-box';
                 blocker3.style.display = '-moz-box';
                 blocker3.style.display = 'box';
                 
-                blocker.style.display = 'none';
-                instructions.style.display = 'none';
+                document.exitPointerLock();
+                
            }
         });
         
@@ -472,12 +475,15 @@ var game = (() => {
             // disable our mouse and keyboard controls
             keyboardControls.enabled = false;
             mouseControls.enabled = false;
+            blocker.style.display = 'none';
+            instructions.style.display = 'none';
+            
             blocker2.style.display = '-webkit-box';
             blocker2.style.display = '-moz-box';
             blocker2.style.display = 'box';
             
-            blocker.style.display = 'none';
-            instructions.style.display = 'none';
+            document.exitPointerLock();
+            
         }
     }
     

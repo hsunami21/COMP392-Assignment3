@@ -315,9 +315,9 @@ var game = (function () {
         playerGeometry = new BoxGeometry(2, 2, 2);
         playerMaterial = Physijs.createMaterial(new LambertMaterial({ color: 0x00ff00 }), 0, 0);
         player = new Physijs.BoxMesh(playerGeometry, playerMaterial, 1);
-        player.position.set(26, 2, -16);
+        // player.position.set(26, 2, -16);
         // FOR TESTING PURPOSES
-        // player.position.set(-12, 2, -5);
+        player.position.set(-12, 2, -5);
         player.rotation.y = Math.PI;
         player.receiveShadow = true;
         player.castShadow = true;
@@ -358,6 +358,7 @@ var game = (function () {
                 blocker3.style.display = '-webkit-box';
                 blocker3.style.display = '-moz-box';
                 blocker3.style.display = 'box';
+                document.exitPointerLock();
                 blocker.style.display = 'none';
                 instructions.style.display = 'none';
             }
@@ -409,6 +410,7 @@ var game = (function () {
             blocker2.style.display = '-webkit-box';
             blocker2.style.display = '-moz-box';
             blocker2.style.display = 'box';
+            document.exitPointerLock();
             blocker.style.display = 'none';
             instructions.style.display = 'none';
         }
