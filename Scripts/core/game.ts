@@ -90,6 +90,9 @@ var game = (() => {
     var blocker2: HTMLElement;
     var over: HTMLElement;
     
+    var blocker3: HTMLElement;
+    var win: HTMLElement;
+    
     // CreateJS variables
     var assets: createjs.LoadQueue;
     var canvas: HTMLElement;
@@ -148,6 +151,8 @@ var game = (() => {
         instructions = document.getElementById("instructions");
         blocker2 = document.getElementById("blocker2");
         over = document.getElementById("over");
+        blocker3 = document.getElementById("blocker3");
+        win = document.getElementById("win");
         
         // Setup CreateJS Canvas and Stage and Scoreboard
         setupCanvas();
@@ -307,18 +312,18 @@ var game = (() => {
         fireTraps = new Array<Physijs.Mesh>();
         fireMaterial = Physijs.createMaterial(new LambertMaterial({ map: THREE.ImageUtils.loadTexture('../../Assets/Images/fire.jpg'), side: THREE.DoubleSide }), 0, 0);
 
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 8), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 8), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(10, 2, 2), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(8, 2, 2), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 8), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 8), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(10, 2, 1), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(8, 2, 1), fireMaterial, 0));
         
         fireTraps[0].position.set(0, 1, 15);
         fireTraps[1].position.set(0, 1, -15);
@@ -369,7 +374,7 @@ var game = (() => {
         player.position.set(26, 2, -16);
         
         // FOR TESTING PURPOSES
-        // player.position.set(-12, 2, 5);
+        // player.position.set(-12, 2, -5);
 
         player.rotation.y = Math.PI;
         player.receiveShadow = true;
@@ -397,7 +402,6 @@ var game = (() => {
                }
                createjs.Sound.play("ouch");
                livesLabel.text = "Lives: " + lives;
-
            }
            if (e.name === "Coin") {
                score += 100;
@@ -405,7 +409,17 @@ var game = (() => {
                scene.remove(e);
                setCoinPosition(e);
                scoreLabel.text = "Score: " + score;
-
+           }
+           if (e.name === "Ladder") {
+               // disable our mouse and keyboard controls
+                keyboardControls.enabled = false;
+                mouseControls.enabled = false;
+                blocker3.style.display = '-webkit-box';
+                blocker3.style.display = '-moz-box';
+                blocker3.style.display = 'box';
+                
+                blocker.style.display = 'none';
+                instructions.style.display = 'none';
            }
         });
         
@@ -472,6 +486,8 @@ var game = (() => {
         instructions.style.display = '';
         console.log("PointerLock Error Detected!!");
     }
+    
+    
     
     // Window Resize Event Handler
     function onWindowResize() {
@@ -616,7 +632,7 @@ var game = (() => {
                     player.applyCentralForce(direction);
                 }
                 
-                // cameraLook();
+                cameraLook();
             }
             
             prevTime = time;

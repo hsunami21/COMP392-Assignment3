@@ -82,6 +82,8 @@ var game = (function () {
     var gameOver = false;
     var blocker2;
     var over;
+    var blocker3;
+    var win;
     // CreateJS variables
     var assets;
     var canvas;
@@ -129,6 +131,8 @@ var game = (function () {
         instructions = document.getElementById("instructions");
         blocker2 = document.getElementById("blocker2");
         over = document.getElementById("over");
+        blocker3 = document.getElementById("blocker3");
+        win = document.getElementById("win");
         // Setup CreateJS Canvas and Stage and Scoreboard
         setupCanvas();
         setupScoreBoard();
@@ -258,18 +262,18 @@ var game = (function () {
         // Fire traps
         fireTraps = new Array();
         fireMaterial = Physijs.createMaterial(new LambertMaterial({ map: THREE.ImageUtils.loadTexture('../../Assets/Images/fire.jpg'), side: THREE.DoubleSide }), 0, 0);
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 8), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 8), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(2, 2, 12), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(10, 2, 2), fireMaterial, 0));
-        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(8, 2, 2), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 8), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 8), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(1, 2, 12), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(10, 2, 1), fireMaterial, 0));
+        fireTraps.push(new Physijs.BoxMesh(new BoxGeometry(8, 2, 1), fireMaterial, 0));
         fireTraps[0].position.set(0, 1, 15);
         fireTraps[1].position.set(0, 1, -15);
         fireTraps[2].position.set(-8, 1, 25);
@@ -313,7 +317,7 @@ var game = (function () {
         player = new Physijs.BoxMesh(playerGeometry, playerMaterial, 1);
         player.position.set(26, 2, -16);
         // FOR TESTING PURPOSES
-        // player.position.set(-12, 2, 5);
+        // player.position.set(-12, 2, -5);
         player.rotation.y = Math.PI;
         player.receiveShadow = true;
         player.castShadow = true;
@@ -346,6 +350,16 @@ var game = (function () {
                 scene.remove(e);
                 setCoinPosition(e);
                 scoreLabel.text = "Score: " + score;
+            }
+            if (e.name === "Ladder") {
+                // disable our mouse and keyboard controls
+                keyboardControls.enabled = false;
+                mouseControls.enabled = false;
+                blocker3.style.display = '-webkit-box';
+                blocker3.style.display = '-moz-box';
+                blocker3.style.display = 'box';
+                blocker.style.display = 'none';
+                instructions.style.display = 'none';
             }
         });
         // Add Direction Line
@@ -520,6 +534,7 @@ var game = (function () {
                 if (Math.abs(player.getLinearVelocity().x) < 20 && Math.abs(player.getLinearVelocity().y) < 10) {
                     player.applyCentralForce(direction);
                 }
+                cameraLook();
             }
             prevTime = time;
         }
