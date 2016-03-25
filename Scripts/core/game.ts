@@ -123,12 +123,12 @@ var game = (() => {
         lives = 5;
         
         scoreLabel = new createjs.Text("Score: " + score, "40px Consolas", "#ffffff");
-        scoreLabel.x = config.Screen.WIDTH * 0.8;
+        scoreLabel.x = config.Screen.WIDTH * 0.1;
         scoreLabel.y = (config.Screen.HEIGHT * 0.1) * 0.15;
         
         
         livesLabel = new createjs.Text("Lives: " + lives, "40px Consolas", "#ffffff");
-        livesLabel.x = config.Screen.WIDTH * 0.1;
+        livesLabel.x = config.Screen.WIDTH * 0.8;
         livesLabel.y = (config.Screen.HEIGHT * 0.1) * 0.15;
 
         stage.addChild(scoreLabel);
@@ -353,10 +353,10 @@ var game = (() => {
         playerGeometry = new BoxGeometry(2, 2, 2);
         playerMaterial = Physijs.createMaterial(new LambertMaterial({color: 0x00ff00}), 0, 0);
         player = new Physijs.BoxMesh(playerGeometry, playerMaterial, 1);
-        // player.position.set(26, 2, -16);
+        player.position.set(26, 2, -16);
         
         // FOR TESTING PURPOSES
-        player.position.set(-12, 2, -5);
+        // player.position.set(-12, 2, -5);
 
         player.rotation.y = Math.PI;
         player.receiveShadow = true;
@@ -452,9 +452,9 @@ var game = (() => {
         
         canvas.style.width = '100%';
         
-        scoreLabel.x = config.Screen.WIDTH * 0.8;
+        scoreLabel.x = config.Screen.WIDTH * 0.1;
         scoreLabel.y = (config.Screen.HEIGHT * 0.1) * 0.15;
-        livesLabel.x = config.Screen.WIDTH * 0.1;
+        livesLabel.x = config.Screen.WIDTH * 0.8;
         livesLabel.y = (config.Screen.HEIGHT * 0.1) * 0.15;
         
         stage.update();
