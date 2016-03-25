@@ -82,6 +82,7 @@ var game = (function () {
     var gameOver = false;
     var blocker2;
     var over;
+    var gameWin = false;
     var blocker3;
     var win;
     // CreateJS variables
@@ -315,9 +316,9 @@ var game = (function () {
         playerGeometry = new BoxGeometry(2, 2, 2);
         playerMaterial = Physijs.createMaterial(new LambertMaterial({ color: 0x00ff00 }), 0, 0);
         player = new Physijs.BoxMesh(playerGeometry, playerMaterial, 1);
-        // player.position.set(26, 2, -16);
+        player.position.set(26, 2, -16);
         // FOR TESTING PURPOSES
-        player.position.set(-12, 2, -5);
+        // player.position.set(-12, 2, -5);
         player.rotation.y = Math.PI;
         player.receiveShadow = true;
         player.castShadow = true;
@@ -352,15 +353,7 @@ var game = (function () {
                 scoreLabel.text = "Score: " + score;
             }
             if (e.name === "Ladder") {
-                // disable our mouse and keyboard controls
-                keyboardControls.enabled = false;
-                mouseControls.enabled = false;
-                blocker3.style.display = '-webkit-box';
-                blocker3.style.display = '-moz-box';
-                blocker3.style.display = 'box';
-                document.exitPointerLock();
-                blocker.style.display = 'none';
-                instructions.style.display = 'none';
+                gameWin = true;
             }
         });
         // Add Direction Line
@@ -407,12 +400,25 @@ var game = (function () {
             // disable our mouse and keyboard controls
             keyboardControls.enabled = false;
             mouseControls.enabled = false;
+            blocker.style.display = 'none';
+            instructions.style.display = 'none';
             blocker2.style.display = '-webkit-box';
             blocker2.style.display = '-moz-box';
             blocker2.style.display = 'box';
             document.exitPointerLock();
+        }
+    }
+    function checkWin() {
+        if (gameWin) {
+            // disable our mouse and keyboard controls
+            keyboardControls.enabled = false;
+            mouseControls.enabled = false;
             blocker.style.display = 'none';
             instructions.style.display = 'none';
+            blocker3.style.display = '-webkit-box';
+            blocker3.style.display = '-moz-box';
+            blocker3.style.display = 'box';
+            document.exitPointerLock();
         }
     }
     //PointerLockError Event Handler
@@ -468,6 +474,7 @@ var game = (function () {
     // Setup main game loop
     function gameLoop() {
         stats.update();
+        checkWin();
         if (lives == 0) {
             gameOver = true;
         }

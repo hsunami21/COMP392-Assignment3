@@ -90,6 +90,7 @@ var game = (() => {
     var blocker2: HTMLElement;
     var over: HTMLElement;
     
+    var gameWin: boolean = false;
     var blocker3: HTMLElement;
     var win: HTMLElement;
     
@@ -411,18 +412,7 @@ var game = (() => {
                scoreLabel.text = "Score: " + score;
            }
            if (e.name === "Ladder") {
-               // disable our mouse and keyboard controls
-                keyboardControls.enabled = false;
-                mouseControls.enabled = false;
-                blocker.style.display = 'none';
-                instructions.style.display = 'none';
-                
-                blocker3.style.display = '-webkit-box';
-                blocker3.style.display = '-moz-box';
-                blocker3.style.display = 'box';
-                
-                document.exitPointerLock();
-                
+               gameWin = true;     
            }
         });
         
@@ -484,6 +474,22 @@ var game = (() => {
             
             document.exitPointerLock();
             
+        }
+    }
+    
+    function checkWin(): void {
+        if (gameWin) {
+            // disable our mouse and keyboard controls
+            keyboardControls.enabled = false;
+            mouseControls.enabled = false;
+            blocker.style.display = 'none';
+            instructions.style.display = 'none';
+            
+            blocker3.style.display = '-webkit-box';
+            blocker3.style.display = '-moz-box';
+            blocker3.style.display = 'box';
+            
+            document.exitPointerLock();      
         }
     }
     
@@ -554,6 +560,8 @@ var game = (() => {
     // Setup main game loop
     function gameLoop(): void {
         stats.update();
+        
+        checkWin();
         
         if (lives == 0) {
             gameOver = true;
